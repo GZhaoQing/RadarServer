@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.2.0/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(
+            function(){
+                $ajax({
+                    url:'/radar/test/r',
+                    type:"GET",
+                    success:function(){
+
+                    }
+                });
+            }
+        );
+    </script>
+</head>
+<body>
+    <div>
+        <div></div>
+        <div>
+            <dl>
+                <dt>Name</dt>
+                <dd><ul>
+                    <li>1</li>
+                    <li>2</li>
+                </ul></dd>
+                <dt>Born</dt>
+                <dd>1952</dd>
+                <dt>Birthplace</dt>
+                <dd>Japan</dd>
+                <dt>Color</dt>
+                <dd>Green</dd>
+            </dl>
+        </div>
+    </div>
+</body>
+</html>
