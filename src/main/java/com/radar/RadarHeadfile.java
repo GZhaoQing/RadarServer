@@ -26,4 +26,8 @@ public class RadarHeadfile {
     public Map<String, String> getAttribute() {
         return attribute;
     }
+
+    public Map<String, String> getVariable() {
+        return variable;
+    }
 }
