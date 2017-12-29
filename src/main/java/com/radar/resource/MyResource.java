@@ -1,8 +1,17 @@
 package com.radar.resource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.radar.RadarFile;
+import com.radar.RadarFileParser;
+
+
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 @Path("/r")
@@ -12,15 +21,24 @@ public class MyResource {
     @Path("/{fileName}")
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String represent(@PathParam("fileName")String file){
-        return "..\\resources\\radarImage.jpg";
-//        File f=new File(System.getProperty("user.dir")+"\\src\\main\\resources\\radarImg.jpg");
+    public String represent(@PathParam("fileName")String file , @Context ServletContext context) throws MalformedURLException {
+        RadarFileParser p=new RadarFileParser();
+        try {
+            double ts=System.currentTimeMillis();
+            p.setImagePath(context.getResource("img").getPath());
+            RadarFile rf=p.parse(Thread.currentThread().getContextClassLoader().getResource("KFWD_SDUS64_NCZGRK_201208150217" ).toString());
+            double te = System.currentTimeMillis();
+            System.out.println(te-ts+"ms");
+            ObjectMapper mapper=new ObjectMapper();
+            String j=mapper.writeValueAsString(rf);
+            return j;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
 
-//        try {
-//            return f.toURI().toURL().toString();
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        }
-//        return "nothing error!";
+//        return Thread.currentThread().getContextClassLoader().getResource("" ).toString()+"\n"+
+//                context.getResource("img").getPath();
+
     }
 }

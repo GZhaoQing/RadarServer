@@ -3,6 +3,8 @@ package com.radar;
 import ucar.ma2.DataType;
 import ucar.nc2.*;
 import ucar.nc2.constants.FeatureType;
+import ucar.nc2.dataset.CoordinateSystem;
+import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dt.RadialDatasetSweep;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
 import ucar.nc2.util.CancelTask;
@@ -14,14 +16,17 @@ import java.io.IOException;
 import java.util.*;
 /*将文件中的头文件信息和数据图像封装到对象*/
 public class RadarFileParser {
-    private String defaultPath=System.getProperty("user.dir" )+"\\src\\main\\resources\\";
-    String fileIndefault = "KFWD_SDUS64_NCZGRK_201208150217";
+    private String defaultPath=Thread.currentThread().getContextClassLoader().getResource("" ).toString();
+    private String fileIndefault = "KFWD_SDUS64_NCZGRK_201208150217";
+    private String imagePath;
+    private NetcdfFile ncFile;
+    private int[] shape;
     public RadarFile parse(String fileIn) throws IOException {
         RadarFile radarFile=new RadarFile();
         RadarHeadfile hFile=new RadarHeadfile();
-        NetcdfFile ncFile=null;
+
         try {
-            ncFile=NetcdfFile.open(defaultPath+fileIndefault);
+            ncFile=NetcdfFile.open(fileIn);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,7 +37,7 @@ public class RadarFileParser {
         radarFile.setHeadfile(hFile);
 
 
-        radarFile.setImgUrl(wirteRGBFile(readData(fileIndefault),fileIndefault));
+        radarFile.setImgUrl(wirteRGBFile(readData(fileIn),fileIndefault));
         return radarFile;
     }
     private LinkedHashMap readDimensions(List<Dimension> listD){
@@ -113,7 +118,6 @@ public class RadarFileParser {
             }
             return str.toString();
         } else {
-
             for (int i = 0; i < attr.getLength(); ++i) {
                 if (i != 0) {
                     str.append(",");
@@ -166,7 +170,7 @@ public class RadarFileParser {
         RadialDatasetSweep rds = (RadialDatasetSweep)
                 FeatureDatasetFactoryManager.open(
                         FeatureType.RADIAL,
-                        defaultPath+fileIn,
+                        fileIn,
                         emptyCancelTask,
                         fm);
 
@@ -190,15 +194,26 @@ public class RadarFileParser {
                 (RadialDatasetSweep.RadialVariable)
                         rds.getDataVariable(dataV[0]);//暂时只读一个
         float[] rData = varRef.readAllData();
+        //数据形状
+        shape=ncFile.findVariable(dataV[0]).getShape();
         return rData;
     }
     private String wirteRGBFile(float[] data,String fileIn) throws IOException{
-        String filePath=System.getProperty("user.dir")+"\\src\\main\\webapp\\";
-        String imgPath="img\\radarImg"+fileIn+".jpg";
-        BufferedImage bi = new BufferedImage(232,232,BufferedImage.TYPE_3BYTE_BGR);
+        String filePath;
+        if(imagePath!=null){
+            filePath=imagePath;
+        }else{
+//           filePath="file:/E:/win7sp1/apache-tomcat-8.0.38-windows-x64/apache-tomcat-8.0.38/webapps/radar/img/";
+            filePath="";
+        }
 
-        for(int i=0 ;i<232;i++){
-            for(int j = 0 ;j<232;j++){
+        String imgPath="imgRadar.jpg";
+        int width=shape[0];
+        int height=shape[1];
+        BufferedImage bi = new BufferedImage(width,height,BufferedImage.TYPE_3BYTE_BGR);
+
+        for(int i=0 ;i<width;i++){
+            for(int j = 0 ;j<height;j++){
                 switch ((int)data[j*232+i]/5){
                     case 0:bi.setRGB(i,j,0xFAFAFA);break;
                     case 1:bi.setRGB(i,j,0xBFBFFC);break;
@@ -226,5 +241,9 @@ public class RadarFileParser {
         }
         ImageIO.write(bi, "jpg", file);
         return imgPath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

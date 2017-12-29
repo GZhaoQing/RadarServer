@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.radar.RadarFile;
 import com.radar.RadarFileParser;
 import com.radar.RadarHeadfile;
@@ -39,5 +40,13 @@ public class TestPaser {
         while(ait.hasNext()){
             System.out.println(ait.next());
         }
+    }
+    @Test
+    public void  Test2Json() throws IOException {
+        RadarFileParser p=new RadarFileParser();
+        RadarFile rf=p.parse("defualtpath");
+        ObjectMapper mapper=new ObjectMapper();
+        String j=mapper.writeValueAsString(rf);
+        System.out.println(j);
     }
 }
