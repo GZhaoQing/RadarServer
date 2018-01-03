@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class RadarHeadfile {
     private Map<String,String> dimention;
-    private Map<String,String> variable;
+    private Map<String,Variable4Json> variable;
     private Map<String,String> attribute;
 
     public void setDimention(Map dimention) {
@@ -27,7 +27,7 @@ public class RadarHeadfile {
         return attribute;
     }
 
-    public Map<String, String> getVariable() {
+    public Map<String, Variable4Json> getVariable() {
         return variable;
     }
 }

@@ -32,7 +32,7 @@ public class RadarFileParser {
         }
 
         hFile.setDimention(readDimensions(ncFile.getDimensions()));
-        hFile.setVariable(readVairable(ncFile.getVariables()));
+        hFile.setVariable(readVairables(ncFile.getVariables()));
         hFile.setAttribute(readAttributes(ncFile.getGlobalAttributes()));
         radarFile.setHeadfile(hFile);
 
@@ -50,45 +50,58 @@ public class RadarFileParser {
         }
         return linkMap;
     }
-    private Map readVairable(List<Variable> listV){
-        LinkedHashMap<String,String>  linkMap=new LinkedHashMap<String, String>();
+    private Map readVairables(List<Variable> listV){
+        LinkedHashMap linkMap=new LinkedHashMap();
         Variable var=null;
         StringBuilder str=new StringBuilder();
+        StringBuilder strType = new StringBuilder();
         StringBuilder strAtt=new StringBuilder();
         Iterator vit=listV.iterator();
         while (vit.hasNext()){
             var=(Variable)vit.next();
+            Variable4Json vj=new Variable4Json();
             DataType dataType=var.getDataType();
 
             if (dataType == null) {
-                str.append("Unknown");
+                strType.append("Unknown");
             } else if (dataType.isEnum()) {
                 if (var.getEnumTypedef() == null) {
-                    str.append("enum UNKNOWN");
+                    strType.append("enum UNKNOWN");
                 } else {
-                    str.append("enum "+NetcdfFile.makeValidCDLName(var.getEnumTypedef().getShortName()));
+                    strType.append("enum "+NetcdfFile.makeValidCDLName(var.getEnumTypedef().getShortName()));
                 }
+            } else if(dataType==DataType.STRUCTURE){
+                strType.append(dataType);
+                Structure struct=(Structure) var;
+                List<Variable> struct_vList=struct.getVariables();
+                vj.setMembers(readVairables(struct_vList));
             } else {
-                str.append(dataType.toString());
+                strType.append(dataType);
             }
 
-            str.append(" ");
+//            str.append(" ");
             Formatter buf=new Formatter();
-            var.getNameAndDimensions(buf, true, false);
+            var.getNameAndDimensions(buf, false, false);
             str.append(buf.toString());
 
             Iterator attrs = var.getAttributes().iterator();
             while( attrs.hasNext()) {
                 Attribute att = (Attribute)attrs.next();
-                strAtt.append(":");
-                strAtt.append(readOneAttr(att));
-                strAtt.append(";");
-                if (att.getDataType() != DataType.STRING) {
-                    strAtt.append(" //"+att.getDataType());
+                if(!att.toString().equals("")){
+                    strAtt.append(":");
+                    strAtt.append(readOneAttr(att));
+                    strAtt.append(";");
+                    if (att.getDataType() != DataType.STRING) {
+                        strAtt.append(" //"+att.getDataType());
+                    }
                 }
+
             }
-            linkMap.put(str.toString(),strAtt.toString());
+            vj.setType(dataType.toString());
+            vj.setAttribute(strAtt.toString());
+            linkMap.put(str.toString(),vj);
             str.delete(0,str.length());
+            strType.delete(0,strType.length());
             strAtt.delete(0,strAtt.length());
         }
         return linkMap;
@@ -99,7 +112,7 @@ public class RadarFileParser {
         Iterator it=listA.iterator();
         while(it.hasNext()){
             attr=(Attribute) it.next();
-             linkMap.put(attr.getFullName(),readOneAttr(attr));
+            linkMap.put(attr.getFullName(),readOneAttr(attr));
         }
 
         return linkMap;
