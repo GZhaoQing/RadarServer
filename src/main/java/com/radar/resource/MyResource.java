@@ -1,6 +1,7 @@
 package com.radar.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.radar.FileParser;
 import com.radar.RadarFile;
 import com.radar.RadarFileParser;
 
@@ -22,11 +23,11 @@ public class MyResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public String represent(@PathParam("fileName")String file , @Context ServletContext context) throws MalformedURLException {
-        RadarFileParser p=new RadarFileParser();
+        FileParser p=new FileParser();
         try {
             double ts=System.currentTimeMillis();
             p.setImagePath(context.getResource("img").getPath());
-            RadarFile rf=p.parse(Thread.currentThread().getContextClassLoader().getResource("KFWD_SDUS64_NCZGRK_201208150217" ).toString());
+            RadarFile rf=p.parse(Thread.currentThread().getContextClassLoader().getResource("KFWD_SDUS64_NCZGRK_201208150217" ).toString(),"KFWD_SDUS64_NCZGRK_201208150217");
             double te = System.currentTimeMillis();
             System.out.println(te-ts+"ms");
             ObjectMapper mapper=new ObjectMapper();
