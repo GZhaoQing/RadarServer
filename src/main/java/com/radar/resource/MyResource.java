@@ -3,15 +3,12 @@ package com.radar.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.radar.FileParser;
 import com.radar.RadarFile;
-import com.radar.RadarFileParser;
 
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.SecurityContext;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 

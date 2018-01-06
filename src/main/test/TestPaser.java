@@ -1,8 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.radar.FileParser;
 import com.radar.RadarFile;
-import com.radar.RadarFileParser;
-import com.radar.RadarHeadfile;
 import org.junit.Test;
 
 import java.io.IOException;

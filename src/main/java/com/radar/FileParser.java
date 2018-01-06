@@ -107,7 +107,7 @@ public class FileParser {
         }
         return linkMap;
     }
-    private Map readVairables(List<Variable> listV){
+    private LinkedHashMap readVairables(List<Variable> listV){
         LinkedHashMap linkMap=new LinkedHashMap();
         Variable var=null;
         StringBuilder str=new StringBuilder();
@@ -163,7 +163,7 @@ public class FileParser {
         }
         return linkMap;
     }
-    private Map readAttributes(List<Attribute> listA){
+    private LinkedHashMap readAttributes(List<Attribute> listA){
         LinkedHashMap  linkMap=new LinkedHashMap<String, String>();
         Attribute attr=null;
         Iterator it=listA.iterator();

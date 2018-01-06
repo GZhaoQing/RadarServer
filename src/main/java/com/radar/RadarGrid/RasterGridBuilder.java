@@ -65,15 +65,15 @@ public class RasterGridBuilder {
 //            System.out.println(type);
             //ncds.getFileTypeId().equals("NIDS"
             if(type==FeatureType.RADIAL){
-                RadialDatasetSweep rds =(RadialDatasetSweep) FeatureDatasetFactoryManager.wrap(
-                        FeatureType.RADIAL,
-                        ncds,
-                        emptyCancelTask ,
-                        fm
-                );
-                RadialDatasetSweep.RadialVariable var=readRadialData(rds);
-                array=Array.factory(var.readAllData());
-                dList=var.getDimensions();
+//                RadialDatasetSweep rds =(RadialDatasetSweep) FeatureDatasetFactoryManager.wrap(
+//                        FeatureType.RADIAL,
+//                        ncds,
+//                        emptyCancelTask ,
+//                        fm
+//                );
+//                RadialDatasetSweep.RadialVariable var=readRadialData(rds);
+//                array=Array.factory(var.readAllData());
+//                dList=var.getDimensions();
             }else {
                 Variable var=reaFeaturedData(fds);
                 array =var.read();
@@ -140,13 +140,13 @@ public class RasterGridBuilder {
         }
         return null;
     }
-    private RadialDatasetSweep.RadialVariable readRadialData(RadialDatasetSweep rds){
-        List<VariableSimpleIF>  vList=rds.getDataVariables();
-        RadialDatasetSweep.RadialVariable var=null;
-        if(vList.size() == 1){
-            var=(RadialDatasetSweep.RadialVariable) vList.iterator().next();
-        }
-        return var;
-    }
+//    private RadialDatasetSweep.RadialVariable readRadialData(RadialDatasetSweep rds){
+//        List<VariableSimpleIF>  vList=rds.getDataVariables();
+//        RadialDatasetSweep.RadialVariable var=null;
+//        if(vList.size() == 1){
+//            var=(RadialDatasetSweep.RadialVariable) vList.iterator().next();
+//        }
+//        return var;
+//    }
 
 }
