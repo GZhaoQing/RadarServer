@@ -35,9 +35,10 @@ public class TestFileRead {
         Iterator it = rds.getDataVariables().iterator();
 
         RadialDatasetSweep.RadialVariable var=(RadialDatasetSweep.RadialVariable)it.next();
-
         float[] data=var.readAllData();
         RadialDatasetSweep.Sweep sweep=var.getSweep(0);
+//        System.out.println(sweep.getBeamWidth());
+        System.out.println(sweep.getRangeToFirstGate());
         float[] azimuth=sweep.getAzimuth();
         int aziLength=azimuth.length;
         float gSize=sweep.getGateSize();
@@ -46,12 +47,21 @@ public class TestFileRead {
         System.out.println(gNum);
 
         BufferedImage bi=new BufferedImage(gNum*2,gNum*2,BufferedImage.TYPE_3BYTE_BGR);
-        int v=0;
+        int v=0;float rv;
         int offX=0;
         int offY=0;
         for(int i=0;i<aziLength;i++){
+//            oneG=sweep.readData(i);
+//            System.out.println(azimuth[i]);
             for(int j=0;j<gNum;j++){
-                v=(int)data[i*230+j];
+                rv=data[i*230+j];
+
+//                rv=oneG[j];
+                if(rv==rv){
+                    v=(int)rv;
+                }else{
+                    v=-1000;
+                }
 //                System.out.println(v);
                 offX= (int) (gNum+Math.cos((azimuth[i]-90)/180*Math.PI)*j);
                 offY= (int) (gNum+Math.sin((azimuth[i]-90)/180*Math.PI)*j);
@@ -63,7 +73,7 @@ public class TestFileRead {
                     case 26:bi.setRGB(offX,offY,0xFFFF00);break;
                     case 20:bi.setRGB(offX,offY,0xFFCF00);break;
                     case 10:bi.setRGB(offX,offY,0xF88700);break;
-                    case 0://bi.setRGB(offX,offY,0x767676);
+                    case 0:bi.setRGB(offX,offY,0x767676);
                          break;
                     case -1:bi.setRGB(offX,offY,0xCDC09F);break;
                     case -10:bi.setRGB(offX,offY,0x008F00);break;
@@ -72,7 +82,8 @@ public class TestFileRead {
                     case -36:bi.setRGB(offX,offY,0x320096);break;
                     case -50:bi.setRGB(offX,offY,0x008AFF);break;
                     case -64:bi.setRGB(offX,offY,0x00E0FF);break;
-                    default:bi.setRGB(offX,offY,0x77007D);;break;
+                    default://bi.setRGB(offX,offY,0x77007D);
+                         break;
                 }
 
 
@@ -84,5 +95,12 @@ public class TestFileRead {
 
         long se=System.currentTimeMillis();
         System.out.println(se-ts);
+
+        // 实验
+//        float[] oneG=sweep.readData(0);
+//        int k=0;
+//        for(float f:oneG){
+//            System.out.println(f+"::"+data[k++]);
+//        }
     }
 }

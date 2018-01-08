@@ -46,6 +46,8 @@ public class FileParser {
     }
     private NetcdfDataset ncds;
     private int[] shape=new int[2];
+    private float[] azimuth;
+    private int gNum;
     public RadarFile parse(String fileIn,String name) throws IOException {
         RadarFile radarFile=new RadarFile();
         RadarHeadfile hFile=new RadarHeadfile();
@@ -79,7 +81,7 @@ public class FileParser {
                         fm);
         FeatureType type=fds.getFeatureType();
         if(type==FeatureType.RADIAL){
-            readRadialData(fds);
+            radarFile.setImgUrl(writeRadialFile(readRadialData(fds),azimuth,gNum,name));
         }else{
             if(ncds.getFileTypeId().equals("NIDS")){
                 radarFile.setImgUrl(writeRGBFile(readFeatureData(fds),shape[0],shape[1],name));
@@ -244,10 +246,12 @@ public class FileParser {
         varRef =
                 (RadialDatasetSweep.RadialVariable)
                        rds.getDataVariable(dataV[0]);//暂时只读一个
-        float[] rData = varRef.readAllData();
-        //数据形状
-        shape=ncds.findVariable(dataV[0]).getShape();
-        return rData;
+        float[] rawData = varRef.readAllData();
+
+        RadialDatasetSweep.Sweep sweep=varRef.getSweep(0);
+        azimuth=sweep.getAzimuth();
+        gNum=sweep.getGateNumber();
+        return rawData;
     }
     private int[] readFeatureData(FeatureDataset fds) throws IOException {
         List<VariableSimpleIF> list=
@@ -333,6 +337,62 @@ public class FileParser {
             BufferedImage bi = new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
 
             bi.getRaster().setPixels(0,0,width,height,data);
+
+            File file=new File(filePath+imgPath);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            ImageIO.write(bi, "jpg", file);
+            return imgPath;
+        }
+        public String writeRadialFile(float[] data,float[] azimuth,int gateNum,String fileName) throws IOException {
+            String filePath;
+            if(imagePath!=null){
+                filePath=imagePath;
+            }else{
+//           filePath="file:/E:/win7sp1/apache-tomcat-8.0.38-windows-x64/apache-tomcat-8.0.38/webapps/radar/img/";
+                filePath="";
+            }
+            String imgPath=fileName+".jpg";
+            BufferedImage bi = new BufferedImage(gateNum*2,gateNum*2,BufferedImage.TYPE_3BYTE_BGR);
+            int v;
+            float rv;
+            int offX;
+            int offY;
+            for(int i=0;i<azimuth.length;i++){
+//            System.out.println(azimuth[i]);
+                for(int j=0;j<gateNum;j++){
+                    rv=data[i*230+j];
+                    if(rv==rv){
+                        v=(int)rv;
+                    }else{
+                        v=-1000;
+                    }
+//                System.out.println(v);
+                    offX= (int) (gateNum+Math.cos((azimuth[i]-90)/180*Math.PI)*j);
+                    offY= (int) (gateNum+Math.sin((azimuth[i]-90)/180*Math.PI)*j);
+                    //绘制
+                    switch (v){
+                        case 64:bi.setRGB(offX,offY,0xFF0000);break;
+                        case 50:bi.setRGB(offX,offY,0xD07A00);break;
+                        case 36:bi.setRGB(offX,offY,0xAE0000);break;
+                        case 26:bi.setRGB(offX,offY,0xFFFF00);break;
+                        case 20:bi.setRGB(offX,offY,0xFFCF00);break;
+                        case 10:bi.setRGB(offX,offY,0xF88700);break;
+                        case 0:bi.setRGB(offX,offY,0x767676);
+                            break;
+                        case -1:bi.setRGB(offX,offY,0xCDC09F);break;
+                        case -10:bi.setRGB(offX,offY,0x008F00);break;
+                        case -20:bi.setRGB(offX,offY,0x00BB00);break;
+                        case -26:bi.setRGB(offX,offY,0x00FB90);break;
+                        case -36:bi.setRGB(offX,offY,0x320096);break;
+                        case -50:bi.setRGB(offX,offY,0x008AFF);break;
+                        case -64:bi.setRGB(offX,offY,0x00E0FF);break;
+                        default://bi.setRGB(offX,offY,0x77007D);
+                                 break;
+                    }
+                }
+            }
 
             File file=new File(filePath+imgPath);
             if (!file.exists()) {

@@ -24,7 +24,7 @@ public class MyResource {
         try {
             double ts=System.currentTimeMillis();
             p.setImagePath(context.getResource("img").getPath());
-            RadarFile rf=p.parse(Thread.currentThread().getContextClassLoader().getResource("KFWD_SDUS64_NCZGRK_201208150217" ).toString(),"KFWD_SDUS64_NCZGRK_201208150217");
+            RadarFile rf=p.parse(Thread.currentThread().getContextClassLoader().getResource("KEWX_SDUS54_N0VEWX_201707270600" ).toString(),"KKEWX_SDUS54_N0VEWX_201707270600");
             double te = System.currentTimeMillis();
             System.out.println(te-ts+"ms");
             ObjectMapper mapper=new ObjectMapper();
