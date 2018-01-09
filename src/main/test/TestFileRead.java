@@ -14,9 +14,9 @@ import java.util.Iterator;
 
 public class TestFileRead {
     @Test
-    public void testFile(){
+    public void testFile() throws IOException {
         FileParser fp=new FileParser();
-        RasterGrid2_Byte rg =fp.readFile(System.getProperty("user.dir")+"\\src\\main\\resources\\"+"SATE_L2_F2G_VISSR_MWB_LBT_SEC_LCN-IR2-20170527-0100.AWX");
+        RasterGrid2_Byte rg =fp.readGridData(System.getProperty("user.dir")+"\\src\\main\\resources\\"+"SATE_L2_F2G_VISSR_MWB_LBT_SEC_LCN-IR2-20170527-0100.AWX");
         System.out.println(rg.m_llx+"\n"+rg.m_lly+"\n"+rg.m_cellSize+"\n"+rg.m_nRows+"\n" +rg.m_nCols+"\n"+rg.m_data);
     }
     @Test
@@ -24,8 +24,7 @@ public class TestFileRead {
         long ts=System.currentTimeMillis();
 
         String path=System.getProperty("user.dir")+"\\src\\main\\resources\\"+"KEWX_SDUS54_N0VEWX_201707270600";
-        FileParser p=new FileParser();
-        p.setImagePath(System.getProperty("user.dir")+"\\src\\main\\resources\\");
+
         RadialDatasetSweep rds=(RadialDatasetSweep) FeatureDatasetFactoryManager.open(
                 FeatureType.RADIAL,
                 path,

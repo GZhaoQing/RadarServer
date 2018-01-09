@@ -14,15 +14,51 @@ import ucar.nc2.ft.FeatureDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
 import ucar.nc2.util.CancelTask;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class FileParser {
-    private String defaultPath=Thread.currentThread().getContextClassLoader().getResource("" ).toString();
-    public RasterGrid2_Byte readFile(String filePath){
+    private String defaultPath;
+
+    private NetcdfDataset ncds;
+    private int[] shape=new int[2];
+    private float[] azimuth;
+    private int gNum;
+    public FileParser() {
+    }
+    public FileParser(String defaultPath) {
+        this.defaultPath = defaultPath;
+    }
+//    public RadarFile parseWithImg() throws IOException {
+//        return parseWithImg(defaultPath);
+//    }
+//    public RadarFile parseWithImg(String fileIn) throws IOException {
+//        return parseWithImg(fileIn,null);
+//    }
+    public RadarFile readWithImg(String fileIn,String imagePath) throws IOException {
+
+        //取得文件名
+        int pos=fileIn.lastIndexOf("/");
+        String name=fileIn.substring(pos+1);
+
+        RadarFile radarFile=new RadarFile();
+        RadarHeadfile hFile=new RadarHeadfile();
+
+        try {
+            ncds= NetcdfDataset.openDataset(fileIn);
+            hFile=readHeadInfo(ncds);
+            radarFile.setHeadfile(hFile);
+
+            return setImage(radarFile,imagePath,name);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            ncds.close();
+        }
+
+        return radarFile;
+    }
+    public RasterGrid2_Byte readGridData(String filePath) throws IOException {
         NetcdfDataset ncds = null;
         try{
             ncds=NetcdfDataset.openDataset(filePath);
@@ -34,68 +70,14 @@ public class FileParser {
             e.printStackTrace();
         }
         finally {
-            try{
-                if(ncds!=null){
-                    ncds.close();
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-            }
+            ncds.close();
         }
         return null;
     }
-    private NetcdfDataset ncds;
-    private int[] shape=new int[2];
-    private float[] azimuth;
-    private int gNum;
-    public RadarFile parse(String fileIn,String name) throws IOException {
-        RadarFile radarFile=new RadarFile();
-        RadarHeadfile hFile=new RadarHeadfile();
-
-        try {
-            ncds= NetcdfDataset.openDataset(fileIn);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        hFile=readHeadInfo(ncds);
-        radarFile.setHeadfile(hFile);
-        //判断数据类型
-        CancelTask emptyCancelTask = new CancelTask() {
-            public boolean isCancel() {
-                return false;
-            }
-            public void setError(String arg0) {
-            }
-
-            public void setProgress(String s, int i) {
-
-            }
-        };
-        Formatter fm=new Formatter();
-        FeatureDataset fds =
-                FeatureDatasetFactoryManager.open(
-                        FeatureType.ANY,
-                        fileIn,
-                        emptyCancelTask,
-                        fm);
-        FeatureType type=fds.getFeatureType();
-        if(type==FeatureType.RADIAL){
-            radarFile.setImgUrl(writeRadialFile(readRadialData(fds),azimuth,gNum,name));
-        }else{
-            if(ncds.getFileTypeId().equals("NIDS")){
-                radarFile.setImgUrl(writeRGBFile(readFeatureData(fds),shape[0],shape[1],name));
-            }else{
-                radarFile.setImgUrl(writePixFile(readFeatureData(fds),shape[0],shape[1],name));
-            }
-        }
-//        radarFile.setImgUrl(wirteRGBFile(readData(fileIn),fileIndefault));
-        return radarFile;
-    }
-    public RadarHeadfile readHeadInfo(NetcdfFile ncFile){
+    private RadarHeadfile readHeadInfo(NetcdfFile ncFile){
         RadarHeadfile hFile=new RadarHeadfile();
         hFile.setDimention(readDimensions(ncFile.getDimensions()));
-        hFile.setVariable(readVairables(ncFile.getVariables()));
+        hFile.setVariable(readVariables(ncFile.getVariables()));
         hFile.setAttribute(readAttributes(ncFile.getGlobalAttributes()));
         return hFile;
     }
@@ -109,7 +91,7 @@ public class FileParser {
         }
         return linkMap;
     }
-    private LinkedHashMap readVairables(List<Variable> listV){
+    private LinkedHashMap readVariables(List<Variable> listV){
         LinkedHashMap linkMap=new LinkedHashMap();
         Variable var=null;
         StringBuilder str=new StringBuilder();
@@ -133,7 +115,7 @@ public class FileParser {
                 strType.append(dataType);
                 Structure struct=(Structure) var;
                 List<Variable> struct_vList=struct.getVariables();
-                vj.setMembers(readVairables(struct_vList));
+                vj.setMembers(readVariables(struct_vList));
             } else {
                 strType.append(dataType);
             }
@@ -245,7 +227,7 @@ public class FileParser {
         }
         varRef =
                 (RadialDatasetSweep.RadialVariable)
-                       rds.getDataVariable(dataV[0]);//暂时只读一个
+                        rds.getDataVariable(dataV[0]);//暂时只读一个
         float[] rawData = varRef.readAllData();
 
         RadialDatasetSweep.Sweep sweep=varRef.getSweep(0);
@@ -279,130 +261,38 @@ public class FileParser {
         return data;
     }
 
-        private String imagePath;
-        public String writeRGBFile(int[] data,int width,int height,String fileName) throws IOException{
-            String filePath;
-            if(imagePath!=null){
-                filePath=imagePath;
+
+    private RadarFile setImage(RadarFile radarFile,String imagePath,String name) throws IOException {
+        ImageCreator ic=new ImageCreator(imagePath);
+        //判断数据类型
+        CancelTask emptyCancelTask = new CancelTask() {
+            public boolean isCancel() {
+                return false;
+            }
+            public void setError(String arg0) {
+            }
+
+            public void setProgress(String s, int i) {
+
+            }
+        };
+        Formatter fm=new Formatter();
+        FeatureDataset fds =
+                FeatureDatasetFactoryManager.wrap(
+                        FeatureType.ANY,
+                        ncds,
+                        emptyCancelTask,
+                        fm);
+        FeatureType type=fds.getFeatureType();
+        if(type==FeatureType.RADIAL){
+            radarFile.setImgUrl(ic.createImage(ImageCreator.RGB_RADIAL,readRadialData(fds),azimuth,gNum,name));
+        }else{
+            if(ncds.getFileTypeId().equals("NIDS")){//Grid格式NEXRAD雷达数据
+                radarFile.setImgUrl(ic.createImage(ImageCreator.RGB_GRID,readFeatureData(fds),shape[0],shape[1],name));
             }else{
-//           filePath="file:/E:/win7sp1/apache-tomcat-8.0.38-windows-x64/apache-tomcat-8.0.38/webapps/radar/img/";
-                filePath="";
+                radarFile.setImgUrl(ic.createImage(ImageCreator.GRAY,readFeatureData(fds),shape[0],shape[1],name));
             }
-
-            String imgPath=fileName+".jpg";
-
-            BufferedImage bi = new BufferedImage(width,height,BufferedImage.TYPE_3BYTE_BGR);
-
-            for(int i=0 ;i<height;i++){
-                for(int j = 0 ;j<width;j++){
-                    //按列读取
-                    switch (data[j*width+i]){
-                        case 0:bi.setRGB(i,j,0xFAFAFA);break;
-                        case 1:bi.setRGB(i,j,0xBFBFFC);break;
-                        case 2:bi.setRGB(i,j,0x7870ED);break;
-                        case 3:bi.setRGB(i,j,0x1C70CF);break;
-                        case 4:bi.setRGB(i,j,0xA6FAA6);break;
-                        case 5:bi.setRGB(i,j,0x00E800);break;
-                        case 6:bi.setRGB(i,j,0x0F911A);break;
-                        case 7:bi.setRGB(i,j,0xFAF263);break;
-                        case 8:bi.setRGB(i,j,0xC7C712);break;
-                        case 9:bi.setRGB(i,j,0x898900);break;
-                        case 10:bi.setRGB(i,j,0xFCABAB);break;
-                        case 11:bi.setRGB(i,j,0xFC5C5C);break;
-                        case 12:bi.setRGB(i,j,0xED122E);break;
-                        case 13:bi.setRGB(i,j,0xD48AFF);break;
-                        case 14:bi.setRGB(i,j,0xA524FA);break;
-                        default:bi.setRGB(i,j,0x000000);break;
-                    }
-                }
-            }
-
-            File file=new File(filePath+imgPath);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            ImageIO.write(bi, "jpg", file);
-            return imgPath;
         }
-        public String writePixFile(int[] data,int width,int height,String fileName) throws IOException {
-            String filePath;
-            if(imagePath!=null){
-                filePath=imagePath;
-            }else{
-//           filePath="file:/E:/win7sp1/apache-tomcat-8.0.38-windows-x64/apache-tomcat-8.0.38/webapps/radar/img/";
-                filePath="";
-            }
-
-            String imgPath=fileName+".jpg";
-            BufferedImage bi = new BufferedImage(width,height,BufferedImage.TYPE_BYTE_GRAY);
-
-            bi.getRaster().setPixels(0,0,width,height,data);
-
-            File file=new File(filePath+imgPath);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            ImageIO.write(bi, "jpg", file);
-            return imgPath;
-        }
-        public String writeRadialFile(float[] data,float[] azimuth,int gateNum,String fileName) throws IOException {
-            String filePath;
-            if(imagePath!=null){
-                filePath=imagePath;
-            }else{
-//           filePath="file:/E:/win7sp1/apache-tomcat-8.0.38-windows-x64/apache-tomcat-8.0.38/webapps/radar/img/";
-                filePath="";
-            }
-            String imgPath=fileName+".jpg";
-            BufferedImage bi = new BufferedImage(gateNum*2,gateNum*2,BufferedImage.TYPE_3BYTE_BGR);
-            int v;
-            float rv;
-            int offX;
-            int offY;
-            for(int i=0;i<azimuth.length;i++){
-//            System.out.println(azimuth[i]);
-                for(int j=0;j<gateNum;j++){
-                    rv=data[i*230+j];
-                    if(rv==rv){
-                        v=(int)rv;
-                    }else{
-                        v=-1000;
-                    }
-//                System.out.println(v);
-                    offX= (int) (gateNum+Math.cos((azimuth[i]-90)/180*Math.PI)*j);
-                    offY= (int) (gateNum+Math.sin((azimuth[i]-90)/180*Math.PI)*j);
-                    //绘制
-                    switch (v){
-                        case 64:bi.setRGB(offX,offY,0xFF0000);break;
-                        case 50:bi.setRGB(offX,offY,0xD07A00);break;
-                        case 36:bi.setRGB(offX,offY,0xAE0000);break;
-                        case 26:bi.setRGB(offX,offY,0xFFFF00);break;
-                        case 20:bi.setRGB(offX,offY,0xFFCF00);break;
-                        case 10:bi.setRGB(offX,offY,0xF88700);break;
-                        case 0:bi.setRGB(offX,offY,0x767676);
-                            break;
-                        case -1:bi.setRGB(offX,offY,0xCDC09F);break;
-                        case -10:bi.setRGB(offX,offY,0x008F00);break;
-                        case -20:bi.setRGB(offX,offY,0x00BB00);break;
-                        case -26:bi.setRGB(offX,offY,0x00FB90);break;
-                        case -36:bi.setRGB(offX,offY,0x320096);break;
-                        case -50:bi.setRGB(offX,offY,0x008AFF);break;
-                        case -64:bi.setRGB(offX,offY,0x00E0FF);break;
-                        default://bi.setRGB(offX,offY,0x77007D);
-                                 break;
-                    }
-                }
-            }
-
-            File file=new File(filePath+imgPath);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            ImageIO.write(bi, "jpg", file);
-            return imgPath;
-        }
-        public void setImagePath(String imagePath) {
-            this.imagePath = imagePath;
-        }
-
+        return radarFile;
+    }
 }
