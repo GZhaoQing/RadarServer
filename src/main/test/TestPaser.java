@@ -43,7 +43,7 @@ public class TestPaser {
     @Test
     public void  Test2Json() throws IOException {
         FileParser p=new FileParser();
-        RadarFile rf=p.parseWithImg(System.getProperty("user.dir")+"\\src\\main\\resources\\KFWD_SDUS64_NCZGRK_201208150217","");
+        RadarFile rf=p.readWithImg(System.getProperty("user.dir")+"\\src\\main\\resources\\KFWD_SDUS64_NCZGRK_201208150217","");
         ObjectMapper mapper=new ObjectMapper();
         String j=mapper.writeValueAsString(rf);
         System.out.println(j);

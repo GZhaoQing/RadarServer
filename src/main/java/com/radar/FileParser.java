@@ -19,8 +19,6 @@ import java.util.*;
 
 public class FileParser {
     private String defaultPath;
-
-    private NetcdfDataset ncds;
     private int[] shape=new int[2];
     private float[] azimuth;
     private int gNum;
@@ -43,34 +41,66 @@ public class FileParser {
 
         RadarFile radarFile=new RadarFile();
         RadarHeadfile hFile=new RadarHeadfile();
-
+        NetcdfDataset ncds=null;
         try {
             ncds= NetcdfDataset.openDataset(fileIn);
             hFile=readHeadInfo(ncds);
             radarFile.setHeadfile(hFile);
 
-            return setImage(radarFile,imagePath,name);
+            return setImage(ncds,radarFile,imagePath,name);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            ncds.close();
+            if(ncds!=null){
+                ncds.close();
+            }
         }
 
         return radarFile;
     }
     public RasterGrid2_Byte readGridData(String filePath) throws IOException {
         NetcdfDataset ncds = null;
+        FeatureDataset fds=null;
         try{
             ncds=NetcdfDataset.openDataset(filePath);
+            CancelTask emptyCancelTask = new CancelTask() {
+                public boolean isCancel() {
+                    return false;
+                }
+                public void setError(String arg0) {
+                }
 
+                public void setProgress(String s, int i) {
+
+                }
+            };
+            Formatter fm=new Formatter();
+            fds =
+                    FeatureDatasetFactoryManager.wrap(
+                            FeatureType.ANY,
+                            ncds,
+                            emptyCancelTask,
+                            fm);
+            List<CoordinateAxis> axisList = ncds.getCoordinateAxes();
+            List<VariableSimpleIF> list=
+                    fds.getDataVariables();
+            Variable var=null;
+            for(VariableSimpleIF v:list){
+                Variable vt=(Variable)v;
+                System.out.println(vt.getDataType());
+                if(vt.getDataType()== DataType.BYTE||vt.getDataType()==DataType.SHORT){
+                    var=vt;
+                }
+            }
             RasterGridBuilder rgBuilder=new RasterGridBuilder();
-            RasterGrid2_Byte rg_byte=rgBuilder.build(ncds);
+            RasterGrid2_Byte rg_byte=rgBuilder.build(var,axisList);
             return rg_byte;
         }catch (IOException e){
             e.printStackTrace();
         }
         finally {
             ncds.close();
+            fds.close();
         }
         return null;
     }
@@ -235,23 +265,34 @@ public class FileParser {
         gNum=sweep.getGateNumber();
         return rawData;
     }
-    private int[] readFeatureData(FeatureDataset fds) throws IOException {
+    private int[] readFeatureData(FeatureDataset fds,List<CoordinateAxis> axisList) throws IOException {
         List<VariableSimpleIF> list=
                 fds.getDataVariables();
-        Variable var=(Variable) list.iterator().next();
-
+        Variable var=null;
+        for(VariableSimpleIF v:list){
+            Variable vt=(Variable)v;
+            System.out.println(vt.getDataType());
+            if(vt.getDataType()== DataType.BYTE||vt.getDataType()==DataType.SHORT){
+                var=vt;
+            }
+        }
         Iterator it=var.getDimensions().iterator();
         Dimension d=null;
         while(it.hasNext()){
             d=(Dimension) it.next();
-            CoordinateAxis axis=ncds.findCoordinateAxis(d.getFullName());
-            AxisType type=axis.getAxisType();
-            if(type==AxisType.GeoX){
-                shape[0]=d.getLength();
-            }else if(type==AxisType.GeoY){
-                shape[1]=d.getLength();
+            for(CoordinateAxis axis:axisList){
+                if(d.getFullName().equals(axis.getFullName())){
+                    AxisType type=axis.getAxisType();
+                    if(type==AxisType.GeoX){
+                        shape[0]=d.getLength();
+                    }else if(type==AxisType.GeoY){
+                        shape[1]=d.getLength();
+                    }
+                    break;
+                }
             }
         }
+
         Array array=var.read();
         int length=(int)array.getSize();
         int[] data=new int[length];
@@ -262,7 +303,7 @@ public class FileParser {
     }
 
 
-    private RadarFile setImage(RadarFile radarFile,String imagePath,String name) throws IOException {
+    private RadarFile setImage(NetcdfDataset ncds,RadarFile radarFile,String imagePath,String name) throws IOException {
         ImageCreator ic=new ImageCreator(imagePath);
         //判断数据类型
         CancelTask emptyCancelTask = new CancelTask() {
@@ -283,14 +324,33 @@ public class FileParser {
                         ncds,
                         emptyCancelTask,
                         fm);
+        List<CoordinateAxis> axisList = ncds.getCoordinateAxes();
         FeatureType type=fds.getFeatureType();
         if(type==FeatureType.RADIAL){
-            radarFile.setImgUrl(ic.createImage(ImageCreator.RGB_RADIAL,readRadialData(fds),azimuth,gNum,name));
+            radarFile.setImgUrl(ic.createImage(
+                    ImageCreator.RGB_RADIAL,
+                    readRadialData(fds),
+                    azimuth,
+                    gNum,
+                    name)
+            );
         }else{
             if(ncds.getFileTypeId().equals("NIDS")){//Grid格式NEXRAD雷达数据
-                radarFile.setImgUrl(ic.createImage(ImageCreator.RGB_GRID,readFeatureData(fds),shape[0],shape[1],name));
+                radarFile.setImgUrl(ic.createImage(
+                        ImageCreator.RGB_GRID,
+                        readFeatureData(fds,axisList),
+                        shape[0],
+                        shape[1],
+                        name)
+                );
             }else{
-                radarFile.setImgUrl(ic.createImage(ImageCreator.GRAY,readFeatureData(fds),shape[0],shape[1],name));
+                radarFile.setImgUrl(ic.createImage(
+                        ImageCreator.GRAY,
+                        readFeatureData(fds,axisList),
+                        shape[0],
+                        shape[1],
+                        name)
+                );
             }
         }
         return radarFile;
