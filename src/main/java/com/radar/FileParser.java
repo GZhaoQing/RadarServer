@@ -34,7 +34,6 @@ public class FileParser {
 //        return parseWithImg(fileIn,null);
 //    }
     public RadarFile readWithImg(String fileIn,String imagePath) throws IOException {
-
         //取得文件名
         int pos=fileIn.lastIndexOf("/");
         String name=fileIn.substring(pos+1);
@@ -55,7 +54,6 @@ public class FileParser {
                 ncds.close();
             }
         }
-
         return radarFile;
     }
     public RasterGrid2_Byte readGridData(String filePath) throws IOException {
@@ -81,19 +79,9 @@ public class FileParser {
                             ncds,
                             emptyCancelTask,
                             fm);
-            List<CoordinateAxis> axisList = ncds.getCoordinateAxes();
-            List<VariableSimpleIF> list=
-                    fds.getDataVariables();
-            Variable var=null;
-            for(VariableSimpleIF v:list){
-                Variable vt=(Variable)v;
-                System.out.println(vt.getDataType());
-                if(vt.getDataType()== DataType.BYTE||vt.getDataType()==DataType.SHORT){
-                    var=vt;
-                }
-            }
+            SimpleDataModule rawData=getVarAndAxis(ncds,fds);
             RasterGridBuilder rgBuilder=new RasterGridBuilder();
-            RasterGrid2_Byte rg_byte=rgBuilder.build(var,axisList);
+            RasterGrid2_Byte rg_byte=rgBuilder.build((Variable) rawData.getVar(),rawData.getAxisList());
             return rg_byte;
         }catch (IOException e){
             e.printStackTrace();
@@ -104,6 +92,7 @@ public class FileParser {
         }
         return null;
     }
+
     private RadarHeadfile readHeadInfo(NetcdfFile ncFile){
         RadarHeadfile hFile=new RadarHeadfile();
         hFile.setDimention(readDimensions(ncFile.getDimensions()));
@@ -238,44 +227,61 @@ public class FileParser {
         }
     }
 
-    private float[] readRadialData(FeatureDataset fds) throws IOException {
-        RadialDatasetSweep rds=(RadialDatasetSweep) fds;
-        List<VariableSimpleIF> list=
-                rds.getDataVariables();
-        int size=list.size();
-        String[] dataV=new String[size];
-        RadialDatasetSweep.RadialVariable varRef=null;
-        if(size==0){
-            dataV[0]=list.get(0).toString();
-        }else{
-            Iterator it=list.iterator();
-            int index=0;
-            while(it.hasNext()){
-                dataV[index]=it.next().toString();
-                index++;
+    private SimpleDataModule getVarAndAxis(NetcdfDataset ncds,FeatureDataset fds) throws IOException {
+
+            FeatureType type=fds.getFeatureType();
+            if(type==FeatureType.RADIAL){
+                RadialDatasetSweep rds=(RadialDatasetSweep)fds;
+                List<VariableSimpleIF> list=
+                        rds.getDataVariables();
+                int size=list.size();
+                String[] dataV=new String[size];
+                RadialDatasetSweep.RadialVariable varRaf=null;
+                if(size==0){
+                    dataV[0]=list.get(0).toString();
+                }else{
+                    Iterator it=list.iterator();
+                    int index=0;
+                    while(it.hasNext()){
+                        dataV[index]=it.next().toString();
+                        index++;
+                    }
+                }
+                varRaf =
+                        (RadialDatasetSweep.RadialVariable)
+                                rds.getDataVariable(dataV[0]);//暂时只读一个
+                return new SimpleDataModule(type,varRaf);
+            }else{
+                List<CoordinateAxis> axisList = ncds.getCoordinateAxes();
+                List<VariableSimpleIF> list=
+                        fds.getDataVariables();
+                Variable var=null;
+                for(VariableSimpleIF v:list){
+                    Variable vt=(Variable)v;
+                    System.out.println(vt.getDataType());
+                    if(vt.getDataType()== DataType.BYTE||vt.getDataType()==DataType.SHORT){
+                        var=vt;
+                    }
+                }
+                return new SimpleDataModule(type,var,axisList);
             }
-        }
-        varRef =
-                (RadialDatasetSweep.RadialVariable)
-                        rds.getDataVariable(dataV[0]);//暂时只读一个
-        float[] rawData = varRef.readAllData();
+
+
+    }
+
+    private float[] readRadialData(SimpleDataModule rawData) throws IOException {
+        RadialDatasetSweep.RadialVariable varRef =(RadialDatasetSweep.RadialVariable) rawData.getVar();
+        float[] data = varRef.readAllData();
 
         RadialDatasetSweep.Sweep sweep=varRef.getSweep(0);
         azimuth=sweep.getAzimuth();
         gNum=sweep.getGateNumber();
-        return rawData;
+        return data;
     }
-    private int[] readFeatureData(FeatureDataset fds,List<CoordinateAxis> axisList) throws IOException {
-        List<VariableSimpleIF> list=
-                fds.getDataVariables();
-        Variable var=null;
-        for(VariableSimpleIF v:list){
-            Variable vt=(Variable)v;
-            System.out.println(vt.getDataType());
-            if(vt.getDataType()== DataType.BYTE||vt.getDataType()==DataType.SHORT){
-                var=vt;
-            }
-        }
+    private int[] readFeatureData(SimpleDataModule rawData) throws IOException {
+        Variable var=(Variable) rawData.getVar();
+        List<CoordinateAxis> axisList=rawData.getAxisList();
+
         Iterator it=var.getDimensions().iterator();
         Dimension d=null;
         while(it.hasNext()){
@@ -292,7 +298,6 @@ public class FileParser {
                 }
             }
         }
-
         Array array=var.read();
         int length=(int)array.getSize();
         int[] data=new int[length];
@@ -304,55 +309,91 @@ public class FileParser {
 
 
     private RadarFile setImage(NetcdfDataset ncds,RadarFile radarFile,String imagePath,String name) throws IOException {
-        ImageCreator ic=new ImageCreator(imagePath);
-        //判断数据类型
-        CancelTask emptyCancelTask = new CancelTask() {
-            public boolean isCancel() {
-                return false;
-            }
-            public void setError(String arg0) {
-            }
+        FeatureDataset fds=null;
+        try{
+            CancelTask emptyCancelTask = new CancelTask() {
+                public boolean isCancel() {
+                    return false;
+                }
+                public void setError(String arg0) {
+                }
 
-            public void setProgress(String s, int i) {
+                public void setProgress(String s, int i) {
 
-            }
-        };
-        Formatter fm=new Formatter();
-        FeatureDataset fds =
-                FeatureDatasetFactoryManager.wrap(
-                        FeatureType.ANY,
-                        ncds,
-                        emptyCancelTask,
-                        fm);
-        List<CoordinateAxis> axisList = ncds.getCoordinateAxes();
-        FeatureType type=fds.getFeatureType();
-        if(type==FeatureType.RADIAL){
-            radarFile.setImgUrl(ic.createImage(
-                    ImageCreator.RGB_RADIAL,
-                    readRadialData(fds),
-                    azimuth,
-                    gNum,
-                    name)
-            );
-        }else{
-            if(ncds.getFileTypeId().equals("NIDS")){//Grid格式NEXRAD雷达数据
+                }
+            };
+            Formatter fm=new Formatter();
+            fds =
+                    FeatureDatasetFactoryManager.wrap(
+                            FeatureType.ANY,
+                            ncds,
+                            emptyCancelTask,
+                            fm);
+
+            SimpleDataModule rawData=getVarAndAxis(ncds,fds);
+
+            ImageCreator ic=new ImageCreator(imagePath);
+            FeatureType type=rawData.type;
+            if(type==FeatureType.RADIAL){
                 radarFile.setImgUrl(ic.createImage(
-                        ImageCreator.RGB_GRID,
-                        readFeatureData(fds,axisList),
-                        shape[0],
-                        shape[1],
+                        ImageCreator.RGB_RADIAL,
+                        readRadialData(rawData),
+                        azimuth,
+                        gNum,
                         name)
                 );
             }else{
-                radarFile.setImgUrl(ic.createImage(
-                        ImageCreator.GRAY,
-                        readFeatureData(fds,axisList),
-                        shape[0],
-                        shape[1],
-                        name)
-                );
+                if(ncds.getFileTypeId().equals("NIDS")){//Grid格式NEXRAD雷达数据
+                    radarFile.setImgUrl(ic.createImage(
+                            ImageCreator.RGB_GRID,
+                            readFeatureData(rawData),
+                            shape[0],
+                            shape[1],
+                            name)
+                    );
+                }else{
+                    radarFile.setImgUrl(ic.createImage(
+                            ImageCreator.GRAY,
+                            readFeatureData(rawData),
+                            shape[0],
+                            shape[1],
+                            name)
+                    );
+                }
             }
+            return radarFile;
+        }catch (IOException e){
+            e.printStackTrace();
         }
-        return radarFile;
+        finally {
+            fds.close();
+        }
+        return null;
+    }
+    private class SimpleDataModule {
+        private FeatureType type;
+        private VariableSimpleIF var;
+        private List<CoordinateAxis> axisList;
+
+        public SimpleDataModule(FeatureType type,VariableSimpleIF var) {
+            this.var = var;
+        }
+
+        public SimpleDataModule(FeatureType type,VariableSimpleIF var, List<CoordinateAxis> axisList) {
+            this.var = var;
+            this.axisList = axisList;
+        }
+
+        public VariableSimpleIF getVar() {
+            return var;
+        }
+
+        public List<CoordinateAxis> getAxisList() {
+            return axisList;
+        }
+
+        public FeatureType getType() {
+            return type;
+        }
     }
 }

@@ -52,20 +52,37 @@
       <file leaf-file-name="FileParser.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/FileParser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1233">
-              <caret line="271" column="8" lean-forward="false" selection-start-line="271" selection-start-column="8" selection-end-line="277" selection-end-column="9" />
+            <state relative-caret-position="121">
+              <caret line="58" column="77" lean-forward="false" selection-start-line="58" selection-start-column="77" selection-end-line="58" selection-end-column="77" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#readWithImg#0;class#FileParser#0" expanded="false" />
-                <element signature="class#2026:2299" expanded="false" />
+                <element signature="method#readGridData#0;class#FileParser#0" expanded="false" />
+                <element signature="class#2024:2297" expanded="false" />
+                <element signature="e#2081#2082#0" expanded="true" />
+                <element signature="e#2133#2134#0" expanded="true" />
                 <element signature="method#readHeadInfo#0;class#FileParser#0" expanded="false" />
                 <element signature="method#readDimensions#0;class#FileParser#0" expanded="false" />
-                <element signature="e#3857#3873#0" expanded="true" />
+                <element signature="e#3484#3500#0" expanded="true" />
                 <element signature="method#readVariables#0;class#FileParser#0" expanded="false" />
                 <element signature="method#readAttributes#0;class#FileParser#0" expanded="false" />
                 <element signature="method#readOneAttr#0;class#FileParser#0" expanded="false" />
+                <element signature="method#getVarAndAxis#0;class#FileParser#0" expanded="false" />
                 <element signature="method#readRadialData#0;class#FileParser#0" expanded="false" />
-                <element signature="class#11021:11262" expanded="false" />
+                <element signature="method#readFeatureData#0;class#FileParser#0" expanded="false" />
+                <element signature="method#setImage#0;class#FileParser#0" expanded="false" />
+                <element signature="class#11485:11758" expanded="false" />
+                <element signature="e#11542#11543#0" expanded="true" />
+                <element signature="e#11594#11595#0" expanded="true" />
+                <element signature="class#SimpleDataModule#0;class#FileParser#0" expanded="false" />
+                <element signature="e#13646#13647#0" expanded="true" />
+                <element signature="e#13684#13685#0" expanded="true" />
+                <element signature="e#13909#13910#0" expanded="true" />
+                <element signature="e#13943#13944#0" expanded="true" />
+                <element signature="e#13996#13997#0" expanded="true" />
+                <element signature="e#14035#14036#0" expanded="true" />
+                <element signature="e#14075#14076#0" expanded="true" />
+                <element signature="e#14110#14111#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -74,7 +91,7 @@
       <file leaf-file-name="RasterGridBuilder.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/RadarGrid/RasterGridBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="377">
+            <state relative-caret-position="1289">
               <caret line="88" column="10" lean-forward="false" selection-start-line="88" selection-start-column="10" selection-end-line="94" selection-end-column="11" />
               <folding />
             </state>
@@ -154,6 +171,7 @@
         <option value="$PROJECT_DIR$/src/main/java/com/radar/RadarGrid/RasterGridBuilder.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/radar/resource/MyResource.java" />
         <option value="$PROJECT_DIR$/src/main/test/TestPaser.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/radar/SimpleDataModule.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/radar/FileParser.java" />
       </list>
     </option>
@@ -195,7 +213,7 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="225" />
     <option name="y" value="4" />
     <option name="width" value="1056" />
@@ -263,15 +281,6 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="radar" type="462c0819:PsiDirectoryNode" />
               <item name="RadarGrid" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="RadarServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="RadarServer" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="radar" type="462c0819:PsiDirectoryNode" />
-              <item name="resource" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="RadarServer" type="b2602c69:ProjectViewProjectNode" />
@@ -650,19 +659,13 @@
       <workItem from="1515478435692" duration="1492000" />
       <workItem from="1515485120831" duration="16153000" />
       <workItem from="1515572786441" duration="721000" />
-      <workItem from="1515581766367" duration="5513000" />
+      <workItem from="1515581766367" duration="10777000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
     <history-entry file="TestFileRead_testFile - 2018.01.10 at 20h 26m 57s.xml">
       <configuration name="TestFileRead.testFile" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="TestFileRead_testRadial - 2018.01.08 at 20h 29m 50s.xml">
-      <configuration name="TestFileRead.testRadial" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="TestFileRead_testRadial - 2018.01.08 at 20h 30m 24s.xml">
-      <configuration name="TestFileRead.testRadial" configurationId="JUnit" />
     </history-entry>
     <history-entry file="TestFileRead_testRadial - 2018.01.08 at 20h 30m 33s.xml">
       <configuration name="TestFileRead.testRadial" configurationId="JUnit" />
@@ -685,9 +688,15 @@
     <history-entry file="TestPaser_Test2Json - 2018.01.10 at 20h 34m 23s.xml">
       <configuration name="TestPaser.Test2Json" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="TestPaser_Test2Json - 2018.01.10 at 21h 47m 18s.xml">
+      <configuration name="TestPaser.Test2Json" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="TestPaser_Test2Json - 2018.01.10 at 21h 49m 26s.xml">
+      <configuration name="TestPaser.Test2Json" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="209491000" />
+    <option name="totallyTimeSpent" value="214755000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -699,7 +708,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -785,7 +794,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/RadarFileParser.java" />
     <entry file="file://$PROJECT_DIR$/src/main/webapp/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="494">
@@ -1072,14 +1080,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/RadarGrid/RasterGridBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="377">
-          <caret line="88" column="10" lean-forward="false" selection-start-line="88" selection-start-column="10" selection-end-line="94" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/resource/MyResource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
@@ -1104,6 +1104,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/SimpleDataModule.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="16" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/test/TestPaser.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
@@ -1112,22 +1120,47 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/RadarGrid/RasterGridBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1289">
+          <caret line="88" column="10" lean-forward="false" selection-start-line="88" selection-start-column="10" selection-end-line="94" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/radar/FileParser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1233">
-          <caret line="271" column="8" lean-forward="false" selection-start-line="271" selection-start-column="8" selection-end-line="277" selection-end-column="9" />
+        <state relative-caret-position="121">
+          <caret line="58" column="77" lean-forward="false" selection-start-line="58" selection-start-column="77" selection-end-line="58" selection-end-column="77" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#readWithImg#0;class#FileParser#0" expanded="false" />
-            <element signature="class#2026:2299" expanded="false" />
+            <element signature="method#readGridData#0;class#FileParser#0" expanded="false" />
+            <element signature="class#2024:2297" expanded="false" />
+            <element signature="e#2081#2082#0" expanded="true" />
+            <element signature="e#2133#2134#0" expanded="true" />
             <element signature="method#readHeadInfo#0;class#FileParser#0" expanded="false" />
             <element signature="method#readDimensions#0;class#FileParser#0" expanded="false" />
-            <element signature="e#3857#3873#0" expanded="true" />
+            <element signature="e#3484#3500#0" expanded="true" />
             <element signature="method#readVariables#0;class#FileParser#0" expanded="false" />
             <element signature="method#readAttributes#0;class#FileParser#0" expanded="false" />
             <element signature="method#readOneAttr#0;class#FileParser#0" expanded="false" />
+            <element signature="method#getVarAndAxis#0;class#FileParser#0" expanded="false" />
             <element signature="method#readRadialData#0;class#FileParser#0" expanded="false" />
-            <element signature="class#11021:11262" expanded="false" />
+            <element signature="method#readFeatureData#0;class#FileParser#0" expanded="false" />
+            <element signature="method#setImage#0;class#FileParser#0" expanded="false" />
+            <element signature="class#11485:11758" expanded="false" />
+            <element signature="e#11542#11543#0" expanded="true" />
+            <element signature="e#11594#11595#0" expanded="true" />
+            <element signature="class#SimpleDataModule#0;class#FileParser#0" expanded="false" />
+            <element signature="e#13646#13647#0" expanded="true" />
+            <element signature="e#13684#13685#0" expanded="true" />
+            <element signature="e#13909#13910#0" expanded="true" />
+            <element signature="e#13943#13944#0" expanded="true" />
+            <element signature="e#13996#13997#0" expanded="true" />
+            <element signature="e#14035#14036#0" expanded="true" />
+            <element signature="e#14075#14076#0" expanded="true" />
+            <element signature="e#14110#14111#0" expanded="true" />
           </folding>
         </state>
       </provider>
