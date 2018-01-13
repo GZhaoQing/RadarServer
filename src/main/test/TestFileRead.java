@@ -1,6 +1,7 @@
 import com.radar.FileParser;
-import com.radar.RadarGrid.RasterGrid2_Byte;
+import com.radar.radargrid.RasterGrid2_Byte;
 import org.junit.Test;
+import ucar.nc2.NCdumpW;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dt.RadialDatasetSweep;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
@@ -9,10 +10,16 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Formatter;
 import java.util.Iterator;
 
 public class TestFileRead {
+    @Test
+    public void DumpTest() throws IOException {
+        String fileIn=System.getProperty("user.dir")+"\\src\\main\\resources\\spherical_pressure_level.grib1";
+        NCdumpW.print(fileIn, new PrintWriter(System.out));
+    }
     @Test
     public void testFile() throws IOException {
         FileParser fp=new FileParser();

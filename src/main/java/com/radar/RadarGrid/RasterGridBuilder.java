@@ -1,22 +1,12 @@
-package com.radar.RadarGrid;
+package com.radar.radargrid;
 
-import com.radar.RadarGrid.RasterGrid2_Byte;
 import ucar.ma2.Array;
-import ucar.ma2.DataType;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
-import ucar.nc2.VariableSimpleIF;
 import ucar.nc2.constants.AxisType;
-import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dt.RadialDatasetSweep;
-import ucar.nc2.ft.FeatureDataset;
-import ucar.nc2.ft.FeatureDatasetFactoryManager;
-import ucar.nc2.util.CancelTask;
 
 import java.io.IOException;
-import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 

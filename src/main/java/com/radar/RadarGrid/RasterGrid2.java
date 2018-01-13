@@ -1,4 +1,4 @@
-package com.radar.RadarGrid;
+package com.radar.radargrid;
 
 //import GeoMeteoro.BasicLib.BasicUtils;
 //import GeoMeteoro.GeoData.VectorData.OutBox;

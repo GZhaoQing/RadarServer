@@ -1,7 +1,7 @@
 package com.radar;
 
-import com.radar.RadarGrid.RasterGrid2_Byte;
-import com.radar.RadarGrid.RasterGridBuilder;
+import com.radar.radargrid.RasterGrid2_Byte;
+import com.radar.radargrid.RasterGridBuilder;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.*;

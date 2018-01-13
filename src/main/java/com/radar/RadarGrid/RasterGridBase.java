@@ -1,4 +1,4 @@
-package com.radar.RadarGrid;
+package com.radar.radargrid;
 
 import java.io.Serializable;
 
